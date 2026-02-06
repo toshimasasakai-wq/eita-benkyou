@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分数マスター ─ 小数・割・%を完全に脳にインストール</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap');
+:root {
+  --bg: #0f1729;
+  --card: #1a2440;
+  --accent: #ff6b6b;
+  --accent2: #4ecdc4;
+  --accent3: #ffe66d;
+  --accent4: #a78bfa;
+  --text: #e8edf5;
+  --dim: #7b8db5;
+  --ok: #22c55e;
+  --ng: #ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Zen Maru Gothic',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:800px;margin:0 auto;padding:16px}
+
+.hdr{text-align:center;padding:24px 0 12px}
+.hdr h1{font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent3),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{color:var(--dim);font-size:.9rem;margin-top:4px}
+
+.scores{display:flex;gap:12px;justify-content:center;margin:12px 0 18px}
+.sc{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:6px 14px;display:flex;align-items:center;gap:6px;font-size:.85rem}
+.sc b{font-size:1.2rem}
+
+.modes{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.mbtn{padding:7px 14px;font-family:inherit;font-size:.82rem;font-weight:700;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:0;color:var(--dim);cursor:pointer;transition:.2s}
+.mbtn.on{background:rgba(78,205,196,.15);border-color:var(--accent2);color:var(--accent2)}
+
+.dots{display:flex;gap:5px;justify-content:center;margin:10px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.1)}
+.dot.g{background:var(--ok)}.dot.r{background:var(--ng)}.dot.c{background:var(--accent3);transform:scale(1.3)}
+
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:24px 20px;margin-bottom:16px;box-shadow:0 6px 30px rgba(0,0,0,.3);animation:pop .4s ease}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+
+.qlbl{text-align:center;font-size:1rem;color:var(--accent3);font-weight:700;margin-bottom:12px}
+.qtxt{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:20px;line-height:1.6}
+
+/* ── 分数表示（border-topで確実に線を描画） ── */
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1}
+.frac .t,.frac .b{font-weight:900}
+.frac .m{width:100%;border-top:3px solid currentColor;margin:3px 0}
+.frac.lg .t,.frac.lg .b{font-size:1.5rem}
+.frac.lg .m{border-top-width:3px;margin:5px 0;min-width:28px}
+.frac.lg{padding:6px 10px;background:rgba(255,255,255,.06);border-radius:10px}
+.frac.md .t,.frac.md .b{font-size:1.2rem}
+.frac.md .m{border-top-width:3px;margin:4px 0;min-width:24px}
+.frac.sm .t,.frac.sm .b{font-size:1.05rem}
+.frac.sm .m{border-top-width:2px;margin:3px 0;min-width:20px}
+
+.vis{display:flex;flex-direction:column;align-items:center;gap:16px;margin-bottom:20px}
+.bar-wrap{width:100%;max-width:480px}
+.bar-lab{display:flex;justify-content:space-between;font-size:.75rem;color:var(--dim);margin-bottom:4px}
+.bar-tr{width:100%;height:44px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+.bar-fl{height:100%;border-radius:10px;transition:width .7s ease}
+.bar-tk{display:flex;justify-content:space-between;margin-top:3px;font-size:.65rem;color:var(--dim)}
+.bar-tk span::before{content:'';display:block;width:1px;height:5px;background:rgba(255,255,255,.12);margin:0 auto 1px}
+
+.grid100{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;max-width:300px}
+.gc{aspect-ratio:1;border-radius:5px;min-width:20px}
+.gc.f{box-shadow:inset 0 -2px 3px rgba(0,0,0,.2)}
+.gc.e{background:rgba(255,255,255,.06)}
+
+.cvr{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.cvb{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;text-align:center;min-width:72px}
+.cvb .lb{font-size:.7rem;color:var(--dim);margin-bottom:2px}
+.cvb .vl{font-size:1.3rem;font-weight:900}
+.cvb.hl{border-color:var(--accent2);background:rgba(78,205,196,.08)}
+.eq{display:flex;align-items:center;color:var(--dim);font-size:1rem}
+
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:460px;margin:0 auto}
+.ch{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 8px;color:var(--text);font-family:inherit;font-size:1.1rem;font-weight:700;cursor:pointer;transition:.2s;text-align:center}
+.ch:hover{border-color:var(--accent2);background:rgba(78,205,196,.08)}
+.ch.ok{border-color:var(--ok)!important;background:rgba(34,197,94,.15)!important}
+.ch.ng{border-color:var(--ng)!important;background:rgba(239,68,68,.1)!important;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+.expl{margin-top:16px;padding:16px;background:rgba(255,230,109,.06);border:1px solid rgba(255,230,109,.15);border-radius:14px;font-size:.9rem;line-height:1.7;display:none}
+.expl.show{display:block;animation:fi .3s}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.expl strong{color:var(--accent3)}
+
+.nbtn{display:none;margin:16px auto 0;padding:12px 36px;font-family:inherit;font-size:1.05rem;font-weight:900;color:var(--bg);background:linear-gradient(135deg,var(--accent2),#38b2ac);border:0;border-radius:12px;cursor:pointer}
+.nbtn.show{display:block}
+
+@media(max-width:600px){
+  .hdr h1{font-size:1.5rem}
+  .qtxt{font-size:1.25rem}
+  .card{padding:18px 14px}
+  .cvb{padding:8px 10px;min-width:60px}.cvb .vl{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <h1>🧮 分数マスター</h1>
+    <p>小数 ↔ 分数 ↔ 割 ↔ ％ を目で見て完全理解！</p>
+  </div>
+  <div class="scores">
+    <div class="sc">🔥<b id="stk">0</b>連続</div>
+    <div class="sc" style="color:var(--ok)">✓<b id="cor">0</b>/<b id="tot" style="color:var(--accent2)">0</b></div>
+  </div>
+  <div class="modes" id="modes"></div>
+  <div class="dots" id="dots"></div>
+  <div class="card" id="card"></div>
+  <div class="expl" id="expl"></div>
+  <button class="nbtn" id="nbtn" onclick="next()">次の問題へ →</button>
+</div>
+<script>
+const F=[
+  {n:1,d:2,dec:0.5,pct:50,w:'5割'},
+  {n:1,d:4,dec:0.25,pct:25,w:'2割5分'},
+  {n:3,d:4,dec:0.75,pct:75,w:'7割5分'},
+  {n:1,d:5,dec:0.2,pct:20,w:'2割'},
+  {n:2,d:5,dec:0.4,pct:40,w:'4割'},
+  {n:3,d:5,dec:0.6,pct:60,w:'6割'},
+  {n:4,d:5,dec:0.8,pct:80,w:'8割'},
+  {n:1,d:10,dec:0.1,pct:10,w:'1割'},
+  {n:3,d:10,dec:0.3,pct:30,w:'3割'},
+  {n:7,d:10,dec:0.7,pct:70,w:'7割'},
+  {n:9,d:10,dec:0.9,pct:90,w:'9割'},
+  {n:1,d:1,dec:1.0,pct:100,w:'10割'},
+];
+const COL=['#ff6b6b','#4ecdc4','#ffe66d','#a78bfa','#f472b6','#34d399','#fb923c','#60a5fa'];
+const pk=a=>a[Math.random()*a.length|0];
+const sh=a=>{a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+function frac(n,d,sz){
+  return '<span class="frac '+sz+'"><span class="t">'+n+'</span><span class="m"></span><span class="b">'+d+'</span></span>';
+}
+
+function convRow(f,hl){
+  return '<div class="cvr">'
+    +'<div class="cvb'+(hl?' hl':'')+'"><div class="lb">分数</div><div class="vl">'+frac(f.n,f.d,'md')+'</div></div>'
+    +'<div class="eq">＝</div>'
+    +'<div class="cvb"><div class="lb">小数</div><div class="vl">'+f.dec+'</div></div>'
+    +'<div class="eq">＝</div>'
+    +'<div class="cvb"><div class="lb">％</div><div class="vl">'+f.pct+'%</div></div>'
+    +'<div class="eq">＝</div>'
+    +'<div class="cvb"><div class="lb">割</div><div class="vl" style="font-size:.9rem">'+f.w+'</div></div>'
+    +'</div>';
+}
+
+let S={mode:'all',sc:0,tot:0,stk:0,hist:[],rnd:0,mx:10,ans:false,cur:null};
+
+const MODES=[{id:'all',lb:'ぜんぶ'},{id:'fd',lb:'分数↔小数'},{id:'fp',lb:'分数↔％'},{id:'wr',lb:'割の世界'},{id:'vi',lb:'絵から当てる'}];
+const mEl=document.getElementById('modes');
+MODES.forEach(function(m){
+  var b=document.createElement('button');
+  b.className='mbtn'+(m.id==='all'?' on':'');
+  b.textContent=m.lb;
+  b.onclick=function(){mEl.querySelectorAll('.mbtn').forEach(function(x){x.classList.remove('on')});b.classList.add('on');S.mode=m.id;reset()};
+  mEl.appendChild(b);
+});
+
+function reset(){S.sc=0;S.tot=0;S.stk=0;S.hist=[];S.rnd=0;upd();next()}
+function upd(){document.getElementById('stk').textContent=S.stk;document.getElementById('cor').textContent=S.sc;document.getElementById('tot').textContent=S.tot}
+function renderDots(){
+  var el=document.getElementById('dots'),h='';
+  for(var i=0;i<S.mx;i++){
+    if(i<S.hist.length)h+='<div class="dot '+(S.hist[i]==='ok'?'g':'r')+'"></div>';
+    else if(i===S.hist.length)h+='<div class="dot c"></div>';
+    else h+='<div class="dot"></div>';
+  }
+  el.innerHTML=h;
+}
+
+function choF(f){
+  var c=[f.n+'/'+f.d];
+  sh(F.filter(function(x){return x.n!==f.n||x.d!==f.d})).forEach(function(a){if(c.length<4){var s=a.n+'/'+a.d;if(c.indexOf(s)<0)c.push(s)}});
+  return sh(c).map(function(s){var p=s.split('/');return{v:s,h:frac(p[0],p[1],'sm')}});
+}
+function choD(f){
+  var c=[''+f.dec];
+  sh(F.filter(function(x){return x.dec!==f.dec})).forEach(function(a){if(c.length<4&&c.indexOf(''+a.dec)<0)c.push(''+a.dec)});
+  return sh(c).map(function(s){return{v:s,h:s}});
+}
+function choP(f){
+  var c=[f.pct+'%'];
+  sh(F.filter(function(x){return x.pct!==f.pct})).forEach(function(a){if(c.length<4){var s=a.pct+'%';if(c.indexOf(s)<0)c.push(s)}});
+  return sh(c).map(function(s){return{v:s,h:s}});
+}
+function choW(f){
+  var c=[f.w];
+  sh(F.filter(function(x){return x.w!==f.w})).forEach(function(a){if(c.length<4&&c.indexOf(a.w)<0)c.push(a.w)});
+  return sh(c).map(function(s){return{v:s,h:s}});
+}
+
+function makeQ(){
+  var types={all:['d2f','f2d','f2p','p2f','d2w','p2w','v2f','v2p'],fd:['d2f','f2d'],fp:['f2p','p2f'],wr:['d2w','p2w'],vi:['v2f','v2p']};
+  return build(pk(types[S.mode]||types.all),pk(F));
+}
+
+function build(t,f){
+  var q={f:f,vis:'bar',ans:'',cho:[],lbl:'',txt:'',exp:''};
+  switch(t){
+    case 'd2f':q.lbl='🔢 小数 → 分数';q.txt='<span style="color:var(--accent)">'+f.dec+'</span> を分数にすると？';q.ans=f.n+'/'+f.d;q.cho=choF(f);q.vis='bar';q.exp='<strong>'+f.dec+'</strong> は「1を'+f.d+'つに分けた'+f.n+'つ」→ '+frac(f.n,f.d,'sm');break;
+    case 'f2d':q.lbl='📐 分数 → 小数';q.txt=frac(f.n,f.d,'lg')+' を小数にすると？';q.ans=''+f.dec;q.cho=choD(f);q.vis='pie';q.exp=f.n+' ÷ '+f.d+' = <strong>'+f.dec+'</strong>';break;
+    case 'f2p':q.lbl='💯 分数 → ％';q.txt=frac(f.n,f.d,'lg')+' は何％？';q.ans=f.pct+'%';q.cho=choP(f);q.vis='grid';q.exp=f.n+'/'+f.d+' = '+f.dec+' → ×100 = <strong>'+f.pct+'%</strong>';break;
+    case 'p2f':q.lbl='🎯 ％ → 分数';q.txt='<span style="color:var(--accent3)">'+f.pct+'%</span> を分数にすると？';q.ans=f.n+'/'+f.d;q.cho=choF(f);q.vis='grid';q.exp=f.pct+'/100 を約分 → '+frac(f.n,f.d,'sm');break;
+    case 'd2w':q.lbl='🏪 小数 → 割';q.txt='<span style="color:var(--accent)">'+f.dec+'</span> は何割？';q.ans=f.w;q.cho=choW(f);q.vis='bar';q.exp=f.dec+' × 10 → <strong>'+f.w+'</strong>。割は「10が基準」！';break;
+    case 'p2w':q.lbl='🔄 ％ → 割';q.txt='<span style="color:var(--accent3)">'+f.pct+'%</span> は何割？';q.ans=f.w;q.cho=choW(f);q.vis='bar';q.exp=f.pct+'% ÷ 10 → <strong>'+f.w+'</strong>';break;
+    case 'v2f':q.lbl='👀 絵を見て分数で答えよう';q.txt='塗られている部分はどれだけ？';q.ans=f.n+'/'+f.d;q.cho=choF(f);q.vis=Math.random()>.5?'pie':'bar';q.exp=f.d+'つに分けて'+f.n+'つ → '+frac(f.n,f.d,'sm')+' = '+f.pct+'%';break;
+    case 'v2p':q.lbl='👀 絵を見て％で答えよう';q.txt='塗られている部分は何％？';q.ans=f.pct+'%';q.cho=choP(f);q.vis='grid';q.exp='100マス中'+Math.round(f.pct)+'マス → <strong>'+f.pct+'%</strong>';break;
+  }
+  return q;
+}
+
+function visBar(f){
+  var p=f.dec*100,c=pk(COL),tk='';
+  for(var i=0;i<=10;i++)tk+='<span>'+i*10+'%</span>';
+  return '<div class="bar-wrap"><div class="bar-lab"><span>0</span><span>1 (=100%)</span></div><div class="bar-tr"><div class="bar-fl" style="width:'+p+'%;background:linear-gradient(90deg,'+c+','+c+'dd)"></div></div><div class="bar-tk">'+tk+'</div></div>'+convRow(f,false);
+}
+
+function visPie(f){
+  var c=pk(COL),r=36,cx=45,cy=45,paths='';
+  for(var i=0;i<f.d;i++){
+    var a0=(i/f.d)*360-90,a1=((i+1)/f.d)*360-90;
+    var r0=a0*Math.PI/180,r1=a1*Math.PI/180;
+    var x1=cx+r*Math.cos(r0),y1=cy+r*Math.sin(r0),x2=cx+r*Math.cos(r1),y2=cy+r*Math.sin(r1);
+    var la=(a1-a0>180)?1:0;
+    paths+='<path d="M'+cx+','+cy+' L'+x1+','+y1+' A'+r+','+r+' 0 '+la+' 1 '+x2+','+y2+' Z" fill="'+(i<f.n?c:'rgba(255,255,255,.06)')+'" stroke="rgba(255,255,255,.15)" stroke-width=".5"/>';
+  }
+  return '<svg viewBox="0 0 90 90" style="width:150px;height:150px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))">'+paths+'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1"/></svg><div style="text-align:center;color:var(--dim);font-size:.85rem">'+f.d+'等分のうち<strong style="color:'+c+'">'+f.n+'つ</strong>が塗り</div>';
+}
+
+function visGrid(f){
+  var fl=Math.round(f.dec*100),c=pk(COL),cells='';
+  for(var i=0;i<100;i++)cells+='<div class="gc '+(i<fl?'f':'e')+'" style="'+(i<fl?'background:'+c:'')+'"></div>';
+  return '<div class="grid100">'+cells+'</div><div style="text-align:center;color:var(--dim);font-size:.85rem;margin-top:6px">100マス中<strong style="color:'+c+'">'+fl+'マス</strong></div>';
+}
+
+function render(q){
+  S.cur=q;S.ans=false;
+  var v='';
+  if(q.vis==='bar')v=visBar(q.f);else if(q.vis==='pie')v=visPie(q.f);else v=visGrid(q.f);
+  var ch='<div class="choices">';
+  q.cho.forEach(function(c){ch+='<button class="ch" data-v="'+c.v+'">'+c.h+'</button>'});
+  ch+='</div>';
+  var card=document.getElementById('card');
+  card.innerHTML='<div class="qlbl">'+q.lbl+'</div><div class="qtxt">'+q.txt+'</div><div class="vis">'+v+'</div>'+ch;
+  card.style.animation='none';card.offsetHeight;card.style.animation='pop .4s ease';
+  document.getElementById('expl').classList.remove('show');
+  document.getElementById('expl').innerHTML='';
+  document.getElementById('nbtn').classList.remove('show');
+  document.querySelectorAll('.ch').forEach(function(b){b.onclick=function(){answer(b)}});
+}
+
+function answer(btn){
+  if(S.ans)return;S.ans=true;S.tot++;S.rnd++;
+  var ok=btn.dataset.v===S.cur.ans;
+  if(ok){S.sc++;S.stk++;btn.classList.add('ok');S.hist.push('ok')}
+  else{S.stk=0;btn.classList.add('ng');S.hist.push('ng');
+    document.querySelectorAll('.ch').forEach(function(b){if(b.dataset.v===S.cur.ans)b.classList.add('ok')});
+  }
+  upd();renderDots();
+  var el=document.getElementById('expl');
+  el.innerHTML=(ok?'🎉 <strong style="color:var(--ok)">正解！</strong> ':'💡 <strong style="color:var(--ng)">おしい！</strong> ')+S.cur.exp+convRow(S.cur.f,true);
+  el.classList.add('show');
+  document.getElementById('nbtn').classList.add('show');
+}
+
+function next(){
+  if(S.rnd>=S.mx){showResult();return}
+  render(makeQ());renderDots();
+}
+
+function showResult(){
+  var p=Math.round(S.sc/S.tot*100),e,m;
+  if(p===100){e='🏆';m='完璧！分数マスター認定！'}
+  else if(p>=80){e='🌟';m='すばらしい！もう少しで完璧！'}
+  else if(p>=60){e='💪';m='いい調子！繰り返そう！'}
+  else{e='📚';m='伸びしろたっぷり！もう1回！'}
+  document.getElementById('card').innerHTML='<div style="text-align:center;padding:20px 0"><div style="font-size:3.5rem">'+e+'</div><div style="font-size:1.8rem;font-weight:900;margin:14px 0;background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">'+S.sc+'/'+S.tot+' 正解（'+p+'%）</div><div style="color:var(--dim);margin-bottom:20px">'+m+'</div><button class="nbtn show" onclick="reset()" style="display:inline-block">もう1回 →</button></div>';
+  document.getElementById('expl').classList.remove('show');
+  document.getElementById('nbtn').classList.remove('show');
+}
+
+next();renderDots();
+</script>
+</body>
+</html>
